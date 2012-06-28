@@ -154,7 +154,33 @@ describe Audited::Adapters::ActiveRecord::Audit, :adapter => :active_record do
           audit.username.should == user.name
         end
       end
-    end
+    end   
+
+    it "should not create nil users" do
+      Audited.skip_nil_users = true
+      Audited.audit_class.as_user(nil) do
+        company = Models::ActiveRecord::Company.create :name => 'The auditors'
+        company.name = 'The Auditors, Inc'
+        company.save
+
+        company.audits.count.should == 0
+      end
+      Audited.skip_nil_users = false
+    end 
+
+    it "should record user objects even when filtering nil" do
+      Audited.skip_nil_users = true
+      Audited.audit_class.as_user(user) do
+        company = Models::ActiveRecord::Company.create :name => 'The auditors'
+        company.name = 'The Auditors, Inc'
+        company.save
+
+        company.audits.each do |audit|
+          audit.user.should == user
+        end
+      end
+      Audited.skip_nil_users = false
+    end 
 
     it "should be thread safe" do
       begin
