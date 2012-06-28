@@ -52,6 +52,7 @@ module Audited
         class_attribute :non_audited_columns,   :instance_writer => false
         class_attribute :auditing_enabled,      :instance_writer => false
         class_attribute :audit_associated_with, :instance_writer => false
+        class_attribute :audited_user,          :instance_writer => false
 
         if options[:only]
           except = self.column_names - options[:only].flatten.map(&:to_s)
@@ -215,7 +216,7 @@ module Audited
       def write_audit(attrs)
         attrs[:associated] = self.send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
-        run_callbacks(:audit)  { self.audits.create(attrs) } if auditing_enabled
+        run_callbacks(:audit)  { self.audits.create(attrs) } if auditing_enabled and (!Audited.skip_nil_users || audited_user.present?)
       end
 
       def require_comment
@@ -258,6 +259,10 @@ module Audited
 
       def enable_auditing
         self.auditing_enabled = true
+      end
+      
+      def audited_user
+        Thread.current[:audited_user]
       end
 
       # All audit operations during the block are recorded as being
