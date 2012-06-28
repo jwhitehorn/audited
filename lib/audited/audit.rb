@@ -87,6 +87,10 @@ module Audited
         attrs
       end
     end
+    
+    def should_create?
+       !Audited.skip_nil_users || user.present?
+    end
 
     private
     def set_version_number
@@ -99,7 +103,7 @@ module Audited
 
     def set_audit_user
       self.user = Thread.current[:audited_user] if Thread.current[:audited_user]
-      nil # prevent stopping callback chains
+      should_create?
     end
   end
 end

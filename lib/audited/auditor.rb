@@ -215,7 +215,7 @@ module Audited
       def write_audit(attrs)
         attrs[:associated] = self.send(audit_associated_with) unless audit_associated_with.nil?
         self.audit_comment = nil
-        run_callbacks(:audit)  { self.audits.create(attrs) } if auditing_enabled and (!Audited.skip_nil_users || audited_user.present?)
+        run_callbacks(:audit)  { self.audits.create(attrs) } if auditing_enabled
       end
 
       def require_comment
@@ -258,10 +258,6 @@ module Audited
 
       def enable_auditing
         self.auditing_enabled = true
-      end
-      
-      def audited_user
-        Thread.current[:audited_user]
       end
 
       # All audit operations during the block are recorded as being
