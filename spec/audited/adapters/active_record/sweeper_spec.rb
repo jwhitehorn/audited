@@ -38,6 +38,18 @@ describe AuditsController, :adapter => :active_record do
       assigns(:company).audits.last.user.should == user
     end
     
+    it "should audit user when filtering nil" do
+      Audited.skip_nil_users = true
+      controller.send(:current_user=, user)
+
+      expect {
+        post :audit
+      }.to change( Audited.audit_class, :count )
+
+      assigns(:company).audits.last.user.should == user
+      Audited.skip_nil_users = false
+    end
+    
     it "should not audit nil user" do
       Audited.skip_nil_users = true
       controller.send(:current_user=, nil)
