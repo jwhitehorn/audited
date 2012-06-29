@@ -103,7 +103,7 @@ module Audited
 
     def set_audit_user
       self.user = Thread.current[:audited_user] if Thread.current[:audited_user]
-      should_create?
+      nil
     end
   end
 end
