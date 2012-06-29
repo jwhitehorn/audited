@@ -37,6 +37,18 @@ describe AuditsController, :adapter => :active_record do
 
       assigns(:company).audits.last.user.should == user
     end
+    
+    it "should not audit nil user" do
+      Audited.skip_nil_users = true
+      controller.send(:current_user=, nil)
+
+      expect {
+        post :audit
+      }.to_not change( Audited.audit_class, :count )
+
+      assigns(:company).audits.count.should == 0
+      Audited.skip_nil_users = false
+    end
 
     it "should support custom users for sweepers" do
       controller.send(:custom_user=, user)
